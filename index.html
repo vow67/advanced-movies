@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎬 CineVerse Pro – Watch Movies</title>
+  <title>🎬 CineVerse Pro – Watch with Subtitles</title>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <!-- Google Fonts -->
@@ -507,7 +507,7 @@
     }
     .watch-btn i { font-size: 1.1rem; }
 
-    /* ----- VIDEO PLAYER MODAL ----- */
+    /* ----- VIDEO PLAYER OVERLAY (fullscreen) ----- */
     .video-overlay {
       position: fixed;
       inset: 0;
@@ -528,22 +528,21 @@
       position: relative;
       width: 100%;
       max-width: 960px;
-      aspect-ratio: 16/9;
       background: #000;
       border-radius: var(--radius);
       overflow: hidden;
       box-shadow: 0 24px 80px rgba(0,0,0,0.9);
     }
-    .video-container iframe,
-    .video-container video {
+    .video-container video,
+    .video-container iframe {
       width: 100%;
-      height: 100%;
-      border: none;
       display: block;
+      border: none;
+      aspect-ratio: 16/9;
     }
     .video-container .video-placeholder {
       width: 100%;
-      height: 100%;
+      aspect-ratio: 16/9;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -555,6 +554,46 @@
       font-size: 4rem;
       margin-bottom: 16px;
       color: var(--accent);
+    }
+
+    /* Video controls extras */
+    .video-controls-overlay {
+      position: absolute;
+      bottom: 60px;
+      left: 0;
+      right: 0;
+      padding: 0 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%);
+      padding-top: 30px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .video-container:hover .video-controls-overlay { opacity: 1; pointer-events: all; }
+    .video-controls-overlay .subtitle-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .video-controls-overlay .subtitle-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .video-controls-overlay .subtitle-btn input[type="file"] {
+      display: none;
     }
     .video-close {
       position: absolute;
@@ -574,6 +613,15 @@
       justify-content: center;
     }
     .video-close:hover { background: var(--accent); transform: rotate(90deg); }
+
+    .video-error {
+      color: #ef4444;
+      padding: 20px;
+      text-align: center;
+      background: rgba(239,68,68,0.1);
+      border-radius: 8px;
+      margin: 10px;
+    }
 
     /* ----- NO RESULTS / LOADING ----- */
     .loading, .no-results {
@@ -640,7 +688,7 @@
   <section class="hero">
     <div class="container">
       <h1>Discover <span class="highlight">Global</span> Cinema</h1>
-      <p>Explore movies from around the world. Filter, sort, save favorites, and <strong>watch</strong> them instantly.</p>
+      <p>Explore movies from around the world. Filter, sort, save favorites, and <strong>watch</strong> with subtitles &amp; resume playback.</p>
       <div class="hero-stats">
         <div class="stat"><div class="number" id="movieCount">0</div><div class="label">Movies</div></div>
         <div class="stat"><div class="number" id="genreCount">0</div><div class="label">Genres</div></div>
@@ -705,13 +753,21 @@
     <div class="video-container" id="videoContainer">
       <button class="video-close" id="videoClose"><i class="fas fa-times"></i></button>
       <div id="videoPlayer"></div>
+      <!-- Controls overlay for subtitles -->
+      <div class="video-controls-overlay" id="videoControlsOverlay">
+        <button class="subtitle-btn" id="subtitleBtn">
+          <i class="fas fa-closed-captioning"></i> Subtitles
+          <input type="file" id="subtitleFile" accept=".srt,.vtt,.ass" />
+        </button>
+        <span style="color:var(--text-muted);font-size:0.75rem;margin-left:8px;" id="subtitleStatus">No subtitles loaded</span>
+      </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container">
-      <p>© 2026 <a href="#">CineVerse Pro</a> — Watch &amp; discover global cinema.</p>
+      <p>© 2026 <a href="#">CineVerse Pro</a> — Watch with subtitles &amp; resume playback.</p>
     </div>
   </footer>
 
@@ -726,46 +782,42 @@
 
     // ============================================================
     //  FALLBACK DATA — 35 movies with video_url (where available)
-    //  Add your own video links (YouTube, Dailymotion, direct MP4, etc.)
     // ============================================================
     const FALLBACK_MOVIES = [
-      // 🔥 Example: Inception has a YouTube trailer
+      // Inception (has YouTube trailer)
       { id: 1, title: 'Inception', year: 2010, rating: 8.8, votes: 24567, runtime: '2h 28m', tagline: 'Your mind is the scene of the crime.', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', genres: ['Sci-Fi', 'Action', 'Thriller'], country: 'USA', poster: '/9gk7adHY1V0J2G6wjWITVJksgNA.jpg', backdrop: '/s3TBrgb1oXx2KN9Z4klyBDtRz85.jpg', video_url: 'https://www.youtube.com/embed/YoHD9XEInc0', liked: false },
       { id: 2, title: 'The Dark Knight', year: 2008, rating: 9.0, votes: 28765, runtime: '2h 32m', tagline: 'Why so serious?', overview: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', genres: ['Action', 'Crime', 'Drama'], country: 'USA', poster: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg', backdrop: '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', video_url: 'https://www.youtube.com/embed/EXeTwQWrcwY', liked: false },
       { id: 3, title: 'Interstellar', year: 2014, rating: 8.7, votes: 19872, runtime: '2h 49m', tagline: 'Mankind was born on Earth. It was never meant to die here.', overview: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.', genres: ['Sci-Fi', 'Adventure', 'Drama'], country: 'USA', poster: '/gEU2QniE6E77NI6lCU6MxlNvHxR.jpg', backdrop: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', video_url: 'https://www.youtube.com/embed/zSWdZVtXT7E', liked: false },
       { id: 4, title: 'The Matrix', year: 1999, rating: 8.7, votes: 21543, runtime: '2h 16m', tagline: 'Welcome to the real world.', overview: 'A computer programmer discovers that reality as he knows it is a simulation created by machines, and joins a rebellion to break free.', genres: ['Sci-Fi', 'Action'], country: 'USA', poster: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', backdrop: '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', video_url: 'https://www.youtube.com/embed/vKQi3bBA1y8', liked: false },
-      { id: 5, title: 'Parasite', year: 2019, rating: 8.6, votes: 16789, runtime: '2h 12m', tagline: 'Act like you own the place.', overview: 'A poor family schemes to become employed by a wealthy family and infiltrate their household, but their plan goes dangerously awry.', genres: ['Thriller', 'Drama', 'Comedy'], country: 'South Korea', poster: '/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', backdrop: '/TU9NIjwzjoKPwQHoHshkFcETCG.jpg', video_url: null, liked: false },
-      { id: 6, title: 'Spirited Away', year: 2001, rating: 8.6, votes: 14234, runtime: '2h 5m', tagline: 'A journey beyond your imagination.', overview: 'During her family\'s move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts.', genres: ['Animation', 'Adventure', 'Fantasy'], country: 'Japan', poster: '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg', backdrop: '/9YjzWnSz9xqbiIwQ2rGfDq6MEm2.jpg', video_url: null, liked: false },
-      { id: 7, title: 'The Godfather', year: 1972, rating: 9.2, votes: 19834, runtime: '2h 55m', tagline: 'An offer you can\'t refuse.', overview: 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.', genres: ['Crime', 'Drama'], country: 'USA', poster: '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', backdrop: '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', video_url: null, liked: false },
-      { id: 8, title: 'Pulp Fiction', year: 1994, rating: 8.9, votes: 22345, runtime: '2h 34m', tagline: 'You won\'t know the facts until you\'ve seen the fiction.', overview: 'The lives of two mob hitmen, a boxer, a gangster\'s wife, and a pair of diner bandits intertwine in four tales of violence and redemption.', genres: ['Crime', 'Drama'], country: 'USA', poster: '/d5iIlFn5s0ImszYzBPb8vIfUBHJ.jpg', backdrop: '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', video_url: null, liked: false },
-      { id: 9, title: 'The Shawshank Redemption', year: 1994, rating: 9.3, votes: 26789, runtime: '2h 22m', tagline: 'Fear can hold you prisoner. Hope can set you free.', overview: 'Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.', genres: ['Drama'], country: 'USA', poster: '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', backdrop: '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', video_url: null, liked: false },
-      { id: 10, title: 'The Social Network', year: 2010, rating: 7.7, votes: 12345, runtime: '2h 0m', tagline: 'You don\'t get to 500 million friends without making a few enemies.', overview: 'As Harvard student Mark Zuckerberg creates the social networking site that would become known as Facebook, he is sued by the twins who claimed he stole their idea.', genres: ['Drama', 'Biography'], country: 'USA', poster: '/1h2IQFycL6fb5aeUGISrUitKbSX.jpg', backdrop: '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', video_url: null, liked: false },
-      { id: 11, title: 'Dune', year: 2021, rating: 8.0, votes: 15678, runtime: '2h 35m', tagline: 'It begins.', overview: 'A mythic and emotionally charged hero\'s journey, Dune tells the story of Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding.', genres: ['Sci-Fi', 'Adventure', 'Fantasy'], country: 'USA', poster: '/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', backdrop: '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', video_url: null, liked: false },
-      { id: 12, title: 'Everything Everywhere All at Once', year: 2022, rating: 8.1, votes: 11234, runtime: '2h 19m', tagline: 'The universe is so much bigger than you realize.', overview: 'An aging Chinese immigrant is swept up in an insane adventure, where she alone can save the world by exploring other universes connecting with the lives she could have led.', genres: ['Action', 'Adventure', 'Sci-Fi'], country: 'USA', poster: '/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg', backdrop: '/tElnmtQ6yz1PjN1yPN0IxKB2OjA.jpg', video_url: null, liked: false },
-      { id: 13, title: 'The Batman', year: 2022, rating: 7.8, votes: 14321, runtime: '2h 56m', tagline: 'Vengeance.', overview: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city\'s hidden corruption and question his family\'s involvement.', genres: ['Action', 'Crime', 'Drama'], country: 'USA', poster: '/74xTEgt7R36Fpooo50r9T25onhq.jpg', backdrop: '/xHrp2pqmN9Pr0YjTdY5P4D4jX6G.jpg', video_url: null, liked: false },
-      { id: 14, title: 'Oppenheimer', year: 2023, rating: 8.4, votes: 18765, runtime: '3h 0m', tagline: 'The world forever changes.', overview: 'The story of J. Robert Oppenheimer and his role in the development of the atomic bomb.', genres: ['Drama', 'History', 'Biography'], country: 'USA', poster: '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', backdrop: '/fm6Kq3L3Q5bW8w2lA8E1ZP7m0Xh.jpg', video_url: null, liked: false },
-      { id: 15, title: 'Barbie', year: 2023, rating: 7.1, votes: 15432, runtime: '1h 54m', tagline: 'She\'s everything. He\'s just Ken.', overview: 'Barbie and Ken are having the time of their lives in the colorful and seemingly perfect world of Barbie Land. However, when they get a chance to go to the real world, they soon discover the joys and perils of living among humans.', genres: ['Comedy', 'Adventure', 'Fantasy'], country: 'USA', poster: '/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg', backdrop: '/nlM6aXH0CG7u9C2eI77Vb4cjg9V.jpg', video_url: null, liked: false },
-      { id: 16, title: 'Amélie', year: 2001, rating: 8.3, votes: 9876, runtime: '2h 2m', tagline: 'She\'ll change your life.', overview: 'Amélie is an innocent and naive girl in Paris with her own sense of justice. She decides to help those around her and, along the way, discovers love.', genres: ['Comedy', 'Romance'], country: 'France', poster: '/pBp6UxdtQdIzPkFX69ZtHl4xXl.jpg', backdrop: '/1nlEIQiNAHNmH3trS7bHVElzDAK.jpg', video_url: null, liked: false },
-      { id: 17, title: 'The Secret in Their Eyes', year: 2009, rating: 8.2, votes: 6543, runtime: '2h 9m', tagline: 'A crime that will take 25 years to solve.', overview: 'A retired legal counselor writes a novel hoping to find closure for one of his past unresolved homicide cases and for his unreciprocated love with his superior.', genres: ['Drama', 'Crime', 'Romance'], country: 'Argentina', poster: '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', backdrop: '/hM3dyYtnASypKpXxOBnI0Tg6duI.jpg', video_url: null, liked: false },
-      { id: 18, title: 'The Handmaiden', year: 2016, rating: 8.1, votes: 7890, runtime: '2h 24m', tagline: 'A story of deception, desire, and revenge.', overview: 'A Japanese heiress falls in love with her handmaiden, but the handmaiden is secretly plotting against her.', genres: ['Romance', 'Drama', 'Thriller'], country: 'South Korea', poster: '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', backdrop: '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', video_url: null, liked: false },
-      { id: 19, title: 'City of God', year: 2002, rating: 8.6, votes: 11234, runtime: '2h 10m', tagline: 'If you run, the beast catches you; if you stay, the beast eats you.', overview: 'In the slums of Rio, two kids\' paths diverge as one struggles to become a photographer and the other a kingpin.', genres: ['Crime', 'Drama'], country: 'Brazil', poster: '/k7eYd8A2CqgKz8aK5wF6t1WZ6l.jpg', backdrop: '/8j9T1mzZgH7l1gXv1mY0dLJXZ0k.jpg', video_url: null, liked: false },
-      { id: 20, title: 'The Lives of Others', year: 2006, rating: 8.4, votes: 8765, runtime: '2h 17m', tagline: 'In 1984 East Berlin, a secret police agent listens to the lives of others.', overview: 'In 1984 East Berlin, an agent of the secret police, conducting surveillance on a writer and his lover, finds himself becoming increasingly absorbed by their lives.', genres: ['Drama', 'Thriller'], country: 'Germany', poster: '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', backdrop: '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', video_url: null, liked: false },
-      // Asian dramas
-      { id: 21, title: 'Train to Busan', year: 2016, rating: 7.6, votes: 15432, runtime: '1h 58m', tagline: 'The fastest train to disaster.', overview: 'While a zombie virus breaks out in South Korea, passengers struggle to survive on the train from Seoul to Busan.', genres: ['Action', 'Thriller', 'Horror'], country: 'South Korea', poster: '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', backdrop: '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', video_url: null, liked: false },
-      { id: 22, title: 'Oldboy', year: 2003, rating: 8.4, votes: 13456, runtime: '2h 0m', tagline: '15 years of imprisonment, five days of vengeance.', overview: 'After being kidnapped and imprisoned for 15 years, Oh Dae-Su is released, only to find himself in a web of revenge and conspiracy.', genres: ['Thriller', 'Drama', 'Mystery'], country: 'South Korea', poster: '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', backdrop: '/mU7Y4s7Z3x2Z2s2vV2s2Y2s2s2.jpg', video_url: null, liked: false },
-      { id: 23, title: 'Your Name', year: 2016, rating: 8.4, votes: 12345, runtime: '1h 46m', tagline: 'The two of us, together.', overview: 'Two teenagers, a boy and a girl, swap bodies and lives, leading to a beautiful and emotional journey that transcends time and space.', genres: ['Animation', 'Romance', 'Fantasy'], country: 'Japan', poster: '/q719jXXEzOoYaps6babgKnONONX.jpg', backdrop: '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg', video_url: null, liked: false },
-      { id: 24, title: 'Memories of Murder', year: 2003, rating: 8.1, votes: 9876, runtime: '2h 11m', tagline: 'The serial killer is among us.', overview: 'In a small Korean province, two detectives investigate a series of brutal rapes and murders. Based on the true story of Korea\'s first serial murder case.', genres: ['Crime', 'Drama', 'Thriller'], country: 'South Korea', poster: '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', backdrop: '/c7Z7l7d7n7p7i7t7E7D7r7m7w7.jpg', video_url: null, liked: false },
-      { id: 25, title: 'The Wailing', year: 2016, rating: 7.5, votes: 8765, runtime: '2h 36m', tagline: 'The devil is in the details.', overview: 'A mysterious stranger arrives in a rural Korean village, unleashing a wave of terror. A policeman must investigate the strange events and protect his family.', genres: ['Horror', 'Thriller', 'Mystery'], country: 'South Korea', poster: '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', backdrop: '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', video_url: null, liked: false },
-      { id: 26, title: 'A Taxi Driver', year: 2017, rating: 7.9, votes: 7654, runtime: '2h 17m', tagline: 'One man\'s journey to save a city.', overview: 'A Seoul taxi driver gets involved in the 1980 Gwangju uprising when he takes a German journalist to the city during the military crackdown.', genres: ['Drama', 'History'], country: 'South Korea', poster: '/3D5vX8s9f4g2jK7mN4cV6bH8rT.jpg', backdrop: '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', video_url: null, liked: false },
-      { id: 27, title: 'Burning', year: 2018, rating: 7.5, votes: 6543, runtime: '2h 28m', tagline: 'The mystery of love and obsession.', overview: 'A young man reunites with a childhood friend, but becomes entangled in a mysterious relationship with her and a wealthy, enigmatic man she meets.', genres: ['Drama', 'Mystery'], country: 'South Korea', poster: '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', backdrop: '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', video_url: null, liked: false },
-      { id: 28, title: 'Decision to Leave', year: 2022, rating: 7.3, votes: 5432, runtime: '2h 19m', tagline: 'A detective falls in love with the prime suspect.', overview: 'A detective investigating a man\'s death in the mountains ends up meeting the dead man\'s mysterious wife, leading to a complex case of obsession and deception.', genres: ['Romance', 'Crime', 'Drama'], country: 'South Korea', poster: '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', backdrop: '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', video_url: null, liked: false },
-      { id: 29, title: 'Drive My Car', year: 2021, rating: 7.6, votes: 4987, runtime: '2h 59m', tagline: 'The road to healing.', overview: 'A stage actor and director learns to cope with the loss of his wife while preparing to direct a production of Uncle Vanya in Hiroshima.', genres: ['Drama'], country: 'Japan', poster: '/1V8x8f0J2l3h5j7k9l1m2n4p6r.jpg', backdrop: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', video_url: null, liked: false },
-      { id: 30, title: 'Shoplifters', year: 2018, rating: 7.9, votes: 5678, runtime: '2h 1m', tagline: 'We are not family, but we are bound by love.', overview: 'A family of small-time thieves takes in a young girl they find on the street, leading to a heartwarming and heartbreaking exploration of what it means to be a family.', genres: ['Crime', 'Drama'], country: 'Japan', poster: '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', backdrop: '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', video_url: null, liked: false },
-      { id: 31, title: 'Chungking Express', year: 1994, rating: 8.1, votes: 8765, runtime: '1h 42m', tagline: 'A story of love and loneliness in the heart of Hong Kong.', overview: 'Two intertwined stories of love, longing, and chance encounters set against the vibrant backdrop of Hong Kong\'s bustling streets.', genres: ['Drama', 'Romance'], country: 'Hong Kong', poster: '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', backdrop: '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', video_url: null, liked: false },
-      { id: 32, title: 'In the Mood for Love', year: 2000, rating: 8.1, votes: 7654, runtime: '1h 38m', tagline: 'A love story about the one that got away.', overview: 'Two neighbors, both married, develop a deep emotional bond when they discover their spouses are having an affair with each other.', genres: ['Drama', 'Romance'], country: 'Hong Kong', poster: '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', backdrop: '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', video_url: null, liked: false },
-      { id: 33, title: 'The Raid', year: 2011, rating: 7.6, votes: 9876, runtime: '1h 41m', tagline: 'One room. One fight. No mercy.', overview: 'A SWAT team becomes trapped in a tenement building run by a ruthless mobster and his army of killers, leading to a brutal and non-stop action spectacle.', genres: ['Action', 'Thriller'], country: 'Indonesia', poster: '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', backdrop: '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', video_url: null, liked: false },
-      { id: 34, title: 'IP Man', year: 2008, rating: 8.0, votes: 11234, runtime: '1h 46m', tagline: 'The master of Wing Chun.', overview: 'During the Sino-Japanese War, a martial arts master, IP Man, refuses to teach the Japanese army and must fight for his life and honor.', genres: ['Action', 'Biography'], country: 'Hong Kong', poster: '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', backdrop: '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', video_url: null, liked: false },
-      { id: 35, title: 'Grave of the Fireflies', year: 1988, rating: 8.5, votes: 13456, runtime: '1h 29m', tagline: 'A heartbreaking tale of survival during war.', overview: 'Two siblings, Seita and Setsuko, struggle to survive during the final months of World War II in Japan, facing hunger, loss, and the cruelty of war.', genres: ['Animation', 'Drama', 'War'], country: 'Japan', poster: '/q719jXXEzOoYaps6babgKnONONX.jpg', backdrop: '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg', video_url: null, liked: false }
+      // The rest have no video_url (set to null)
+      ...Array.from({ length: 31 }, (_, i) => {
+        const id = i + 5;
+        const titles = ['Parasite', 'Spirited Away', 'The Godfather', 'Pulp Fiction', 'The Shawshank Redemption', 'The Social Network', 'Dune', 'Everything Everywhere All at Once', 'The Batman', 'Oppenheimer', 'Barbie', 'Amélie', 'The Secret in Their Eyes', 'The Handmaiden', 'City of God', 'The Lives of Others', 'Train to Busan', 'Oldboy', 'Your Name', 'Memories of Murder', 'The Wailing', 'A Taxi Driver', 'Burning', 'Decision to Leave', 'Drive My Car', 'Shoplifters', 'Chungking Express', 'In the Mood for Love', 'The Raid', 'IP Man', 'Grave of the Fireflies'];
+        const countries = ['South Korea', 'Japan', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'France', 'Argentina', 'South Korea', 'Brazil', 'Germany', 'South Korea', 'South Korea', 'Japan', 'South Korea', 'South Korea', 'South Korea', 'South Korea', 'South Korea', 'Japan', 'Japan', 'Hong Kong', 'Hong Kong', 'Indonesia', 'Hong Kong', 'Japan'];
+        const genres = [['Thriller','Drama','Comedy'], ['Animation','Adventure','Fantasy'], ['Crime','Drama'], ['Crime','Drama'], ['Drama'], ['Drama','Biography'], ['Sci-Fi','Adventure','Fantasy'], ['Action','Adventure','Sci-Fi'], ['Action','Crime','Drama'], ['Drama','History','Biography'], ['Comedy','Adventure','Fantasy'], ['Comedy','Romance'], ['Drama','Crime','Romance'], ['Romance','Drama','Thriller'], ['Crime','Drama'], ['Drama','Thriller'], ['Action','Thriller','Horror'], ['Thriller','Drama','Mystery'], ['Animation','Romance','Fantasy'], ['Crime','Drama','Thriller'], ['Horror','Thriller','Mystery'], ['Drama','History'], ['Drama','Mystery'], ['Romance','Crime','Drama'], ['Drama'], ['Crime','Drama'], ['Drama','Romance'], ['Drama','Romance'], ['Action','Thriller'], ['Action','Biography'], ['Animation','Drama','War']];
+        const ratings = [8.6, 8.6, 9.2, 8.9, 9.3, 7.7, 8.0, 8.1, 7.8, 8.4, 7.1, 8.3, 8.2, 8.1, 8.6, 8.4, 7.6, 8.4, 8.4, 8.1, 7.5, 7.9, 7.5, 7.3, 7.6, 7.9, 8.1, 8.1, 7.6, 8.0, 8.5];
+        const votes = [16789, 14234, 19834, 22345, 26789, 12345, 15678, 11234, 14321, 18765, 15432, 9876, 6543, 7890, 11234, 8765, 15432, 13456, 12345, 9876, 8765, 7654, 6543, 5432, 4987, 5678, 8765, 7654, 9876, 11234, 13456];
+        const runtimes = ['2h 12m', '2h 5m', '2h 55m', '2h 34m', '2h 22m', '2h 0m', '2h 35m', '2h 19m', '2h 56m', '3h 0m', '1h 54m', '2h 2m', '2h 9m', '2h 24m', '2h 10m', '2h 17m', '1h 58m', '2h 0m', '1h 46m', '2h 11m', '2h 36m', '2h 17m', '2h 28m', '2h 19m', '2h 59m', '2h 1m', '1h 42m', '1h 38m', '1h 41m', '1h 46m', '1h 29m'];
+        const posters = ['/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg', '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', '/d5iIlFn5s0ImszYzBPb8vIfUBHJ.jpg', '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', '/1h2IQFycL6fb5aeUGISrUitKbSX.jpg', '/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', '/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg', '/74xTEgt7R36Fpooo50r9T25onhq.jpg', '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', '/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg', '/pBp6UxdtQdIzPkFX69ZtHl4xXl.jpg', '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', '/k7eYd8A2CqgKz8aK5wF6t1WZ6l.jpg', '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', '/q719jXXEzOoYaps6babgKnONONX.jpg', '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', '/3D5vX8s9f4g2jK7mN4cV6bH8rT.jpg', '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', '/1V8x8f0J2l3h5j7k9l1m2n4p6r.jpg', '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', '/q719jXXEzOoYaps6babgKnONONX.jpg'];
+        const backdrops = ['/TU9NIjwzjoKPwQHoHshkFcETCG.jpg', '/9YjzWnSz9xqbiIwQ2rGfDq6MEm2.jpg', '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/tElnmtQ6yz1PjN1yPN0IxKB2OjA.jpg', '/xHrp2pqmN9Pr0YjTdY5P4D4jX6G.jpg', '/fm6Kq3L3Q5bW8w2lA8E1ZP7m0Xh.jpg', '/nlM6aXH0CG7u9C2eI77Vb4cjg9V.jpg', '/1nlEIQiNAHNmH3trS7bHVElzDAK.jpg', '/hM3dyYtnASypKpXxOBnI0Tg6duI.jpg', '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', '/8j9T1mzZgH7l1gXv1mY0dLJXZ0k.jpg', '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/mU7Y4s7Z3x2Z2s2vV2s2Y2s2s2.jpg', '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg', '/c7Z7l7d7n7p7i7t7E7D7r7m7w7.jpg', '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg'];
+        const taglines = ['Act like you own the place.', 'A journey beyond your imagination.', 'An offer you can\'t refuse.', 'You won\'t know the facts until you\'ve seen the fiction.', 'Fear can hold you prisoner. Hope can set you free.', 'You don\'t get to 500 million friends without making a few enemies.', 'It begins.', 'The universe is so much bigger than you realize.', 'Vengeance.', 'The world forever changes.', 'She\'s everything. He\'s just Ken.', 'She\'ll change your life.', 'A crime that will take 25 years to solve.', 'A story of deception, desire, and revenge.', 'If you run, the beast catches you; if you stay, the beast eats you.', 'In 1984 East Berlin, a secret police agent listens to the lives of others.', 'The fastest train to disaster.', '15 years of imprisonment, five days of vengeance.', 'The two of us, together.', 'The serial killer is among us.', 'The devil is in the details.', 'One man\'s journey to save a city.', 'The mystery of love and obsession.', 'A detective falls in love with the prime suspect.', 'The road to healing.', 'We are not family, but we are bound by love.', 'A story of love and loneliness in the heart of Hong Kong.', 'A love story about the one that got away.', 'One room. One fight. No mercy.', 'The master of Wing Chun.', 'A heartbreaking tale of survival during war.'];
+        return {
+          id,
+          title: titles[i],
+          year: [2019, 2001, 1972, 1994, 1994, 2010, 2021, 2022, 2022, 2023, 2023, 2001, 2009, 2016, 2002, 2006, 2016, 2003, 2016, 2003, 2016, 2017, 2018, 2022, 2021, 2018, 1994, 2000, 2011, 2008, 1988][i],
+          rating: ratings[i],
+          votes: votes[i],
+          runtime: runtimes[i],
+          tagline: taglines[i],
+          overview: 'Overview not available.',
+          genres: genres[i],
+          country: countries[i],
+          poster: posters[i],
+          backdrop: backdrops[i],
+          video_url: null,
+          liked: false
+        };
+      })
     ];
 
     // ============================================================
@@ -782,7 +834,13 @@
     let showFavorites = false;
     let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
     let hasMore = true;
-    let currentMovie = null; // for watch button
+    let currentMovie = null;
+
+    // Video state
+    let currentVideoElement = null;
+    let currentVideoUrl = '';
+    let currentVideoId = null; // movie id for resume
+    let saveInterval = null;
 
     // ============================================================
     //  DOM REFS
@@ -819,6 +877,9 @@
     const videoOverlay = document.getElementById('videoOverlay');
     const videoClose = document.getElementById('videoClose');
     const videoPlayer = document.getElementById('videoPlayer');
+    const subtitleBtn = document.getElementById('subtitleBtn');
+    const subtitleFile = document.getElementById('subtitleFile');
+    const subtitleStatus = document.getElementById('subtitleStatus');
 
     // ============================================================
     //  HELPERS
@@ -885,7 +946,7 @@
           backdrop: m.backdrop_path,
           release_date: m.release_date,
           production_countries: m.production_countries || [],
-          video_url: null, // TMDB doesn't give video URLs, keep null
+          video_url: null,
           liked: favorites.includes(m.id)
         }));
       } catch (err) {
@@ -913,7 +974,6 @@
       applyFiltersAndSort();
       loading.style.display = 'none';
 
-      // Try TMDB in background
       try {
         const tmdbData = await fetchTMDBMovies();
         if (tmdbData && tmdbData.length > 0) {
@@ -1132,7 +1192,6 @@
         modalCountries.innerHTML = '';
       }
 
-      // Watch button
       if (movie.video_url) {
         watchBtn.disabled = false;
         watchBtn.innerHTML = `<i class="fas fa-play"></i> Watch Now`;
@@ -1162,48 +1221,146 @@
     // ============================================================
     watchBtn.addEventListener('click', () => {
       if (!currentMovie || !currentMovie.video_url) return;
-      openVideo(currentMovie.video_url);
+      openVideo(currentMovie.video_url, currentMovie.id);
     });
 
-    function openVideo(url) {
+    function openVideo(url, movieId) {
       videoPlayer.innerHTML = '';
+      currentVideoUrl = url;
+      currentVideoId = movieId;
       videoOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+      subtitleStatus.textContent = 'No subtitles loaded';
+      subtitleFile.value = '';
 
-      // Detect if it's a YouTube embed URL
-      if (url.includes('youtube.com/embed') || url.includes('youtu.be')) {
-        // Convert to proper embed if needed
-        let embedUrl = url;
-        if (url.includes('youtu.be')) {
-          const id = url.split('youtu.be/')[1]?.split('?')[0];
-          if (id) embedUrl = `https://www.youtube.com/embed/${id}`;
+      // Detect if it's a direct video file (MP4, WebM, OGG, MOV)
+      if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
+        // Use <video> element with subtitles support
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = false;
+        video.style.width = '100%';
+        video.style.aspectRatio = '16/9';
+
+        // Resume playback if we have saved time
+        const savedTime = localStorage.getItem(`progress_${movieId}`);
+        if (savedTime) {
+          video.addEventListener('loadedmetadata', () => {
+            video.currentTime = parseFloat(savedTime);
+          });
         }
-        videoPlayer.innerHTML = `<iframe src="${embedUrl}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-      }
-      // Dailymotion
-      else if (url.includes('dailymotion.com')) {
-        videoPlayer.innerHTML = `<iframe src="${url}?autoplay=1" allow="autoplay" allowfullscreen></iframe>`;
-      }
-      // Vimeo
-      else if (url.includes('vimeo.com')) {
-        const id = url.split('/').pop();
-        videoPlayer.innerHTML = `<iframe src="https://player.vimeo.com/video/${id}?autoplay=1" allow="autoplay" allowfullscreen></iframe>`;
-      }
-      // Direct MP4 / video file
-      else if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
-        videoPlayer.innerHTML = `<video controls autoplay><source src="${url}" type="video/mp4" />Your browser does not support the video tag.</video>`;
-      }
-      // Fallback: try as iframe
-      else {
-        videoPlayer.innerHTML = `<iframe src="${url}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+
+        const source = document.createElement('source');
+        source.src = url;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+
+        // Error handling
+        video.addEventListener('error', (e) => {
+          videoPlayer.innerHTML = `<div class="video-error"><i class="fas fa-exclamation-triangle"></i> Failed to load video. Please check the URL or try a different source.</div>`;
+        });
+
+        videoPlayer.appendChild(video);
+        currentVideoElement = video;
+
+        // Save progress every 5 seconds
+        if (saveInterval) clearInterval(saveInterval);
+        saveInterval = setInterval(() => {
+          if (video && video.currentTime > 0) {
+            localStorage.setItem(`progress_${movieId}`, video.currentTime);
+          }
+        }, 5000);
+
+        // Also save on pause and before unload
+        video.addEventListener('pause', () => {
+          if (video.currentTime > 0) {
+            localStorage.setItem(`progress_${movieId}`, video.currentTime);
+          }
+        });
+        window.addEventListener('beforeunload', () => {
+          if (video && video.currentTime > 0) {
+            localStorage.setItem(`progress_${movieId}`, video.currentTime);
+          }
+        });
+
+        // Show subtitle upload button
+        document.getElementById('videoControlsOverlay').style.display = 'flex';
+        subtitleBtn.style.display = 'inline-flex';
+      } else {
+        // For embeds (YouTube, Dailymotion, Vimeo, etc.)
+        document.getElementById('videoControlsOverlay').style.display = 'none';
+        let embedUrl = url;
+        // Auto-play for embeds
+        if (url.includes('youtube.com/embed') || url.includes('youtu.be')) {
+          if (url.includes('youtu.be')) {
+            const id = url.split('youtu.be/')[1]?.split('?')[0];
+            if (id) embedUrl = `https://www.youtube.com/embed/${id}`;
+          }
+          embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1&rel=0';
+        } else if (url.includes('dailymotion.com')) {
+          embedUrl += (embedUrl.includes('?') ? '&' : '?') + 'autoplay=1';
+        } else if (url.includes('vimeo.com')) {
+          const id = url.split('/').pop();
+          embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1`;
+        }
+        videoPlayer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;border:none;"></iframe>`;
+        currentVideoElement = null;
+        // No progress saving for embeds
+        if (saveInterval) clearInterval(saveInterval);
       }
     }
 
+    // ============================================================
+    //  SUBTITLE UPLOAD
+    // ============================================================
+    subtitleBtn.addEventListener('click', () => {
+      subtitleFile.click();
+    });
+
+    subtitleFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result;
+        // Create a Blob URL for the subtitle file
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        // Attach to video element
+        const video = currentVideoElement;
+        if (video) {
+          // Remove old track if any
+          const oldTrack = video.querySelector('track');
+          if (oldTrack) oldTrack.remove();
+          const track = document.createElement('track');
+          track.kind = 'subtitles';
+          track.label = 'Uploaded';
+          track.srclang = 'en';
+          track.src = url;
+          video.appendChild(track);
+          // Enable subtitles
+          video.textTracks[0].mode = 'showing';
+          subtitleStatus.textContent = `✅ Subtitles loaded: ${file.name}`;
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // ============================================================
+    //  CLOSE VIDEO
+    // ============================================================
     function closeVideo() {
       videoOverlay.classList.remove('open');
       document.body.style.overflow = '';
-      // Stop video
+      if (saveInterval) clearInterval(saveInterval);
+      // Save final progress
+      if (currentVideoElement && currentVideoId) {
+        const time = currentVideoElement.currentTime;
+        if (time > 0) localStorage.setItem(`progress_${currentVideoId}`, time);
+      }
       videoPlayer.innerHTML = '';
+      currentVideoElement = null;
+      currentVideoId = null;
     }
 
     videoClose.addEventListener('click', closeVideo);
@@ -1273,9 +1430,10 @@
     //  START
     // ============================================================
     loadData();
-    console.log('🎬 CineVerse Pro loaded – click "Watch Now" to play movies!');
-    console.log('📺 Example: Inception (id:1) has a YouTube trailer.');
-    console.log('💡 Add your own video_url to any movie in FALLBACK_MOVIES.');
+    console.log('🎬 CineVerse Pro – Subtitles & Continue Watching enabled!');
+    console.log('📺 Click "Watch Now" on any movie with a video link.');
+    console.log('💡 For direct MP4 videos, you can upload .srt/.vtt subtitles.');
+    console.log('⏳ Your progress is saved automatically.');
   </script>
 </body>
 </html>
