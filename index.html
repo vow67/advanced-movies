@@ -1596,14 +1596,25 @@
         modalCountries.innerHTML = '';
       }
 
-      if (movie.video_url) {
+      // --- UPDATED: Restrict video based on login status ---
+      if (currentUser && movie.video_url) {
+        // Logged in AND video available
         watchBtn.disabled = false;
         watchBtn.innerHTML = `<i class="fas fa-play"></i> Watch Now`;
         watchBtn.style.display = 'inline-flex';
+        watchBtn.dataset.action = 'watch';
+      } else if (!currentUser) {
+        // Not logged in -> show login prompt
+        watchBtn.disabled = false;
+        watchBtn.innerHTML = `<i class="fas fa-lock"></i> Log in to Watch`;
+        watchBtn.style.display = 'inline-flex';
+        watchBtn.dataset.action = 'login';
       } else {
+        // Logged in but no video available
         watchBtn.disabled = true;
         watchBtn.innerHTML = `<i class="fas fa-ban"></i> Streaming not available`;
         watchBtn.style.display = 'inline-flex';
+        watchBtn.dataset.action = 'disabled';
       }
 
       document.body.style.overflow = 'hidden';
@@ -1621,11 +1632,21 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
     // ============================================================
-    //  WATCH BUTTON → VIDEO PLAYER
+    //  WATCH BUTTON → VIDEO PLAYER OR LOGIN
     // ============================================================
     watchBtn.addEventListener('click', () => {
-      if (!currentMovie || !currentMovie.video_url) return;
-      openVideo(currentMovie.video_url, currentMovie.id);
+      const action = watchBtn.dataset.action;
+
+      if (action === 'login') {
+        // Close the movie modal and open the login overlay
+        closeModal();
+        openAuth(true);
+        return;
+      }
+
+      if (action === 'watch' && currentMovie && currentMovie.video_url) {
+        openVideo(currentMovie.video_url, currentMovie.id);
+      }
     });
 
     function openVideo(url, movieId) {
@@ -1822,7 +1843,7 @@
     updateAuthUI();
     loadData();
 
-    console.log('🎬 CineVerse Pro – Login & Registration with Formspree!');
+    console.log('🎬 CineVerse Pro – Video access restricted to logged-in users!');
     console.log('📧 All submissions go to:', FORMPREE_ENDPOINT);
     console.log('👤 Users are stored in localStorage for demo purposes.');
   </script>
