@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎬 CineVerse Pro – Watch with Subtitles</title>
+  <title>🎬 CineVerse Pro – Login & Register</title>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <!-- Google Fonts -->
@@ -27,6 +27,7 @@
       --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
       --rating-color: #fbbf24;
       --success: #22c55e;
+      --error: #ef4444;
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -120,6 +121,32 @@
       border-color: var(--accent);
       transform: scale(1.05);
     }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .user-badge .username {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .user-badge .logout-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.75rem;
+      font-family: inherit;
+    }
+    .user-badge .logout-btn:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
 
     /* ----- HERO ----- */
     .hero {
@@ -156,6 +183,172 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       text-transform: uppercase;
+    }
+
+    /* ----- AUTH FORMS (overlay) ----- */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .auth-overlay.open { opacity: 1; pointer-events: all; }
+
+    .auth-modal {
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      max-width: 420px;
+      width: 100%;
+      padding: 32px 28px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+      transform: scale(0.92) translateY(20px);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .auth-overlay.open .auth-modal { transform: scale(1) translateY(0); }
+
+    .auth-modal h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .auth-modal .subtitle {
+      color: var(--text-muted);
+      text-align: center;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .auth-modal .auth-close {
+      float: right;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .auth-modal .auth-close:hover { color: var(--text-primary); transform: rotate(90deg); }
+
+    .auth-modal .form-group {
+      margin-bottom: 16px;
+    }
+    .auth-modal .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .auth-modal .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .auth-modal .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    .auth-modal .submit-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      margin-top: 8px;
+    }
+    .auth-modal .submit-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+    .auth-modal .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .auth-modal .auth-switch {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .auth-modal .auth-switch a {
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .auth-modal .auth-switch a:hover { text-decoration: underline; }
+
+    .auth-modal .form-message {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      display: none;
+    }
+    .auth-modal .form-message.success {
+      display: block;
+      background: rgba(34,197,94,0.15);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+    .auth-modal .form-message.error {
+      display: block;
+      background: rgba(239,68,68,0.15);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    /* ----- AUTH BUTTONS in header ----- */
+    .auth-btn {
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .auth-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .auth-btn.outline {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .auth-btn.outline:hover {
+      border-color: var(--accent);
+      color: #fff;
+      background: rgba(124,58,237,0.08);
+      box-shadow: none;
     }
 
     /* ----- CONTROLS ----- */
@@ -507,7 +700,7 @@
     }
     .watch-btn i { font-size: 1.1rem; }
 
-    /* ----- VIDEO PLAYER OVERLAY (fullscreen) ----- */
+    /* ----- VIDEO PLAYER OVERLAY ----- */
     .video-overlay {
       position: fixed;
       inset: 0;
@@ -556,7 +749,6 @@
       color: var(--accent);
     }
 
-    /* Video controls extras */
     .video-controls-overlay {
       position: absolute;
       bottom: 60px;
@@ -658,6 +850,7 @@
       .hero h1 { font-size: 2rem; }
       .movies-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
       .video-container { aspect-ratio: 16/9; }
+      .auth-modal { padding: 24px 16px; }
     }
     @media (max-width: 480px) {
       .movies-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
@@ -668,7 +861,7 @@
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- ===== HEADER ===== -->
   <header class="header">
     <div class="container header-inner">
       <a href="#" class="logo"><i class="fas fa-film"></i><span>CineVerse Pro</span></a>
@@ -677,6 +870,11 @@
           <i class="fas fa-search"></i>
           <input type="text" class="search-input" id="searchInput" placeholder="Search movies..." autocomplete="off" />
         </div>
+        <!-- Auth buttons / user badge -->
+        <div id="authSection">
+          <button class="auth-btn" id="loginBtn">Log In</button>
+          <button class="auth-btn outline" id="registerBtn">Sign Up</button>
+        </div>
         <button class="btn-icon" id="themeToggle" title="Toggle theme"><i class="fas fa-moon"></i></button>
         <button class="btn-icon" id="favoritesToggle" title="Show favorites"><i class="fas fa-heart"></i></button>
         <button class="btn-icon" id="refreshBtn" title="Refresh from TMDB"><i class="fas fa-sync"></i></button>
@@ -684,11 +882,11 @@
     </div>
   </header>
 
-  <!-- HERO -->
+  <!-- ===== HERO ===== -->
   <section class="hero">
     <div class="container">
       <h1>Discover <span class="highlight">Global</span> Cinema</h1>
-      <p>Explore movies from around the world. Filter, sort, save favorites, and <strong>watch</strong> with subtitles &amp; resume playback.</p>
+      <p>Explore movies from around the world. Filter, sort, save favorites, and watch with subtitles.</p>
       <div class="hero-stats">
         <div class="stat"><div class="number" id="movieCount">0</div><div class="label">Movies</div></div>
         <div class="stat"><div class="number" id="genreCount">0</div><div class="label">Genres</div></div>
@@ -698,7 +896,7 @@
     </div>
   </section>
 
-  <!-- MAIN -->
+  <!-- ===== MAIN CONTENT ===== -->
   <main class="container">
     <div class="controls" id="controls">
       <div class="control-group" id="genreFilters">
@@ -726,7 +924,43 @@
     <button class="load-more" id="loadMoreBtn" style="display:none;">Load More <i class="fas fa-chevron-down"></i></button>
   </main>
 
-  <!-- MODAL (Details) -->
+  <!-- ===== AUTH OVERLAY (Login / Register) ===== -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-modal">
+      <button class="auth-close" id="authClose"><i class="fas fa-times"></i></button>
+      <h2 id="authTitle">Log In</h2>
+      <p class="subtitle" id="authSubtitle">Welcome back! Log in to your account.</p>
+
+      <div class="form-message" id="authMessage"></div>
+
+      <form id="authForm">
+        <!-- Username (only for registration) -->
+        <div class="form-group" id="usernameGroup" style="display:none;">
+          <label for="authUsername">Username</label>
+          <input type="text" id="authUsername" placeholder="Choose a username" />
+        </div>
+
+        <div class="form-group">
+          <label for="authEmail">Email address</label>
+          <input type="email" id="authEmail" placeholder="your@email.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required minlength="6" />
+        </div>
+
+        <button type="submit" class="submit-btn" id="authSubmit">Log In</button>
+      </form>
+
+      <div class="auth-switch">
+        <span id="authSwitchText">Don't have an account?</span>
+        <a id="authSwitchLink">Sign Up</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL (Movie Details) ===== -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
@@ -748,12 +982,11 @@
     </div>
   </div>
 
-  <!-- VIDEO PLAYER OVERLAY -->
+  <!-- ===== VIDEO PLAYER OVERLAY ===== -->
   <div class="video-overlay" id="videoOverlay">
     <div class="video-container" id="videoContainer">
       <button class="video-close" id="videoClose"><i class="fas fa-times"></i></button>
       <div id="videoPlayer"></div>
-      <!-- Controls overlay for subtitles -->
       <div class="video-controls-overlay" id="videoControlsOverlay">
         <button class="subtitle-btn" id="subtitleBtn">
           <i class="fas fa-closed-captioning"></i> Subtitles
@@ -764,10 +997,10 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
+  <!-- ===== FOOTER ===== -->
   <footer class="footer">
     <div class="container">
-      <p>© 2026 <a href="#">CineVerse Pro</a> — Watch with subtitles &amp; resume playback.</p>
+      <p>© 2026 <a href="#">CineVerse Pro</a> — Watch, discover &amp; connect.</p>
     </div>
   </footer>
 
@@ -775,49 +1008,25 @@
     // ============================================================
     //  CONFIGURATION
     // ============================================================
+    const FORMPREE_ENDPOINT = 'https://formspree.io/f/mgojnblb';
     const TMDB_API_KEY = 'b4800cfea522c32661aa12691b22e5ce';
     const TMDB_BASE = 'https://api.themoviedb.org/3';
     const POSTER_BASE = 'https://image.tmdb.org/t/p/w342';
     const BACKDROP_BASE = 'https://image.tmdb.org/t/p/w780';
 
     // ============================================================
-    //  FALLBACK DATA — 35 movies with video_url (where available)
+    //  FALLBACK DATA (simplified for brevity – you can expand)
     // ============================================================
     const FALLBACK_MOVIES = [
-      // Inception (has YouTube trailer)
-      { id: 1, title: 'Inception', year: 2010, rating: 8.8, votes: 24567, runtime: '2h 28m', tagline: 'Your mind is the scene of the crime.', overview: 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a CEO.', genres: ['Sci-Fi', 'Action', 'Thriller'], country: 'USA', poster: '/9gk7adHY1V0J2G6wjWITVJksgNA.jpg', backdrop: '/s3TBrgb1oXx2KN9Z4klyBDtRz85.jpg', video_url: 'https://www.youtube.com/embed/YoHD9XEInc0', liked: false },
-      { id: 2, title: 'The Dark Knight', year: 2008, rating: 9.0, votes: 28765, runtime: '2h 32m', tagline: 'Why so serious?', overview: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', genres: ['Action', 'Crime', 'Drama'], country: 'USA', poster: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg', backdrop: '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', video_url: 'https://www.youtube.com/embed/EXeTwQWrcwY', liked: false },
-      { id: 3, title: 'Interstellar', year: 2014, rating: 8.7, votes: 19872, runtime: '2h 49m', tagline: 'Mankind was born on Earth. It was never meant to die here.', overview: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.', genres: ['Sci-Fi', 'Adventure', 'Drama'], country: 'USA', poster: '/gEU2QniE6E77NI6lCU6MxlNvHxR.jpg', backdrop: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', video_url: 'https://www.youtube.com/embed/zSWdZVtXT7E', liked: false },
-      { id: 4, title: 'The Matrix', year: 1999, rating: 8.7, votes: 21543, runtime: '2h 16m', tagline: 'Welcome to the real world.', overview: 'A computer programmer discovers that reality as he knows it is a simulation created by machines, and joins a rebellion to break free.', genres: ['Sci-Fi', 'Action'], country: 'USA', poster: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', backdrop: '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', video_url: 'https://www.youtube.com/embed/vKQi3bBA1y8', liked: false },
-      // The rest have no video_url (set to null)
-      ...Array.from({ length: 31 }, (_, i) => {
-        const id = i + 5;
-        const titles = ['Parasite', 'Spirited Away', 'The Godfather', 'Pulp Fiction', 'The Shawshank Redemption', 'The Social Network', 'Dune', 'Everything Everywhere All at Once', 'The Batman', 'Oppenheimer', 'Barbie', 'Amélie', 'The Secret in Their Eyes', 'The Handmaiden', 'City of God', 'The Lives of Others', 'Train to Busan', 'Oldboy', 'Your Name', 'Memories of Murder', 'The Wailing', 'A Taxi Driver', 'Burning', 'Decision to Leave', 'Drive My Car', 'Shoplifters', 'Chungking Express', 'In the Mood for Love', 'The Raid', 'IP Man', 'Grave of the Fireflies'];
-        const countries = ['South Korea', 'Japan', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'USA', 'France', 'Argentina', 'South Korea', 'Brazil', 'Germany', 'South Korea', 'South Korea', 'Japan', 'South Korea', 'South Korea', 'South Korea', 'South Korea', 'South Korea', 'Japan', 'Japan', 'Hong Kong', 'Hong Kong', 'Indonesia', 'Hong Kong', 'Japan'];
-        const genres = [['Thriller','Drama','Comedy'], ['Animation','Adventure','Fantasy'], ['Crime','Drama'], ['Crime','Drama'], ['Drama'], ['Drama','Biography'], ['Sci-Fi','Adventure','Fantasy'], ['Action','Adventure','Sci-Fi'], ['Action','Crime','Drama'], ['Drama','History','Biography'], ['Comedy','Adventure','Fantasy'], ['Comedy','Romance'], ['Drama','Crime','Romance'], ['Romance','Drama','Thriller'], ['Crime','Drama'], ['Drama','Thriller'], ['Action','Thriller','Horror'], ['Thriller','Drama','Mystery'], ['Animation','Romance','Fantasy'], ['Crime','Drama','Thriller'], ['Horror','Thriller','Mystery'], ['Drama','History'], ['Drama','Mystery'], ['Romance','Crime','Drama'], ['Drama'], ['Crime','Drama'], ['Drama','Romance'], ['Drama','Romance'], ['Action','Thriller'], ['Action','Biography'], ['Animation','Drama','War']];
-        const ratings = [8.6, 8.6, 9.2, 8.9, 9.3, 7.7, 8.0, 8.1, 7.8, 8.4, 7.1, 8.3, 8.2, 8.1, 8.6, 8.4, 7.6, 8.4, 8.4, 8.1, 7.5, 7.9, 7.5, 7.3, 7.6, 7.9, 8.1, 8.1, 7.6, 8.0, 8.5];
-        const votes = [16789, 14234, 19834, 22345, 26789, 12345, 15678, 11234, 14321, 18765, 15432, 9876, 6543, 7890, 11234, 8765, 15432, 13456, 12345, 9876, 8765, 7654, 6543, 5432, 4987, 5678, 8765, 7654, 9876, 11234, 13456];
-        const runtimes = ['2h 12m', '2h 5m', '2h 55m', '2h 34m', '2h 22m', '2h 0m', '2h 35m', '2h 19m', '2h 56m', '3h 0m', '1h 54m', '2h 2m', '2h 9m', '2h 24m', '2h 10m', '2h 17m', '1h 58m', '2h 0m', '1h 46m', '2h 11m', '2h 36m', '2h 17m', '2h 28m', '2h 19m', '2h 59m', '2h 1m', '1h 42m', '1h 38m', '1h 41m', '1h 46m', '1h 29m'];
-        const posters = ['/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg', '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', '/d5iIlFn5s0ImszYzBPb8vIfUBHJ.jpg', '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', '/1h2IQFycL6fb5aeUGISrUitKbSX.jpg', '/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', '/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg', '/74xTEgt7R36Fpooo50r9T25onhq.jpg', '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', '/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg', '/pBp6UxdtQdIzPkFX69ZtHl4xXl.jpg', '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', '/k7eYd8A2CqgKz8aK5wF6t1WZ6l.jpg', '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', '/q719jXXEzOoYaps6babgKnONONX.jpg', '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', '/3D5vX8s9f4g2jK7mN4cV6bH8rT.jpg', '/4Araae3JZRVDJbtSIfPLYLoxS9H.jpg', '/5gX6lB7dK4gV9q9r3f1lFdZv1b.jpg', '/1V8x8f0J2l3h5j7k9l1m2n4p6r.jpg', '/8H7l3Y8h5p6j9kL2mN0bO2rP5uX.jpg', '/7TjauzD0y7k8dFhTMmMfgZPUZTE.jpg', '/9U5r7y8W6e4bH3mP2nI6jFd0s1a.jpg', '/pUc61b6DFQzEz8jC02J7wHtdwY2.jpg', '/mZ1iP7qB1R0q7p1Q8i1Fj1K1l1.jpg', '/q719jXXEzOoYaps6babgKnONONX.jpg'];
-        const backdrops = ['/TU9NIjwzjoKPwQHoHshkFcETCG.jpg', '/9YjzWnSz9xqbiIwQ2rGfDq6MEm2.jpg', '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/tElnmtQ6yz1PjN1yPN0IxKB2OjA.jpg', '/xHrp2pqmN9Pr0YjTdY5P4D4jX6G.jpg', '/fm6Kq3L3Q5bW8w2lA8E1ZP7m0Xh.jpg', '/nlM6aXH0CG7u9C2eI77Vb4cjg9V.jpg', '/1nlEIQiNAHNmH3trS7bHVElzDAK.jpg', '/hM3dyYtnASypKpXxOBnI0Tg6duI.jpg', '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', '/8j9T1mzZgH7l1gXv1mY0dLJXZ0k.jpg', '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/mU7Y4s7Z3x2Z2s2vV2s2Y2s2s2.jpg', '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg', '/c7Z7l7d7n7p7i7t7E7D7r7m7w7.jpg', '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', '/nz3qCu3Dho5cXx3pPGKdU0n7hnG.jpg', '/l3t7QrE6MvFmmfEo2eKd6TtL4F.jpg', '/aQ5sA7fG6JhLk8mN0bO3pR2tX4c.jpg', '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', '/d6C1mzGdb0bO3ZmhTHqOcFqLl8N.jpg', '/m9qB8w2s4s2dKp2n4m9Qb0J7W4V.jpg'];
-        const taglines = ['Act like you own the place.', 'A journey beyond your imagination.', 'An offer you can\'t refuse.', 'You won\'t know the facts until you\'ve seen the fiction.', 'Fear can hold you prisoner. Hope can set you free.', 'You don\'t get to 500 million friends without making a few enemies.', 'It begins.', 'The universe is so much bigger than you realize.', 'Vengeance.', 'The world forever changes.', 'She\'s everything. He\'s just Ken.', 'She\'ll change your life.', 'A crime that will take 25 years to solve.', 'A story of deception, desire, and revenge.', 'If you run, the beast catches you; if you stay, the beast eats you.', 'In 1984 East Berlin, a secret police agent listens to the lives of others.', 'The fastest train to disaster.', '15 years of imprisonment, five days of vengeance.', 'The two of us, together.', 'The serial killer is among us.', 'The devil is in the details.', 'One man\'s journey to save a city.', 'The mystery of love and obsession.', 'A detective falls in love with the prime suspect.', 'The road to healing.', 'We are not family, but we are bound by love.', 'A story of love and loneliness in the heart of Hong Kong.', 'A love story about the one that got away.', 'One room. One fight. No mercy.', 'The master of Wing Chun.', 'A heartbreaking tale of survival during war.'];
-        return {
-          id,
-          title: titles[i],
-          year: [2019, 2001, 1972, 1994, 1994, 2010, 2021, 2022, 2022, 2023, 2023, 2001, 2009, 2016, 2002, 2006, 2016, 2003, 2016, 2003, 2016, 2017, 2018, 2022, 2021, 2018, 1994, 2000, 2011, 2008, 1988][i],
-          rating: ratings[i],
-          votes: votes[i],
-          runtime: runtimes[i],
-          tagline: taglines[i],
-          overview: 'Overview not available.',
-          genres: genres[i],
-          country: countries[i],
-          poster: posters[i],
-          backdrop: backdrops[i],
-          video_url: null,
-          liked: false
-        };
-      })
+      { id: 1, title: 'Inception', year: 2010, rating: 8.8, votes: 24567, runtime: '2h 28m', tagline: 'Your mind is the scene of the crime.', overview: 'A thief who steals corporate secrets...', genres: ['Sci-Fi', 'Action', 'Thriller'], country: 'USA', poster: '/9gk7adHY1V0J2G6wjWITVJksgNA.jpg', backdrop: '/s3TBrgb1oXx2KN9Z4klyBDtRz85.jpg', video_url: 'https://www.youtube.com/embed/YoHD9XEInc0', liked: false },
+      { id: 2, title: 'The Dark Knight', year: 2008, rating: 9.0, votes: 28765, runtime: '2h 32m', tagline: 'Why so serious?', overview: 'When the menace known as the Joker wreaks havoc...', genres: ['Action', 'Crime', 'Drama'], country: 'USA', poster: '/qJ2tW6WMUDux911r6m7haRef0WH.jpg', backdrop: '/nMKdUUepR0i5zn0y1T4CsSB5chy.jpg', video_url: 'https://www.youtube.com/embed/EXeTwQWrcwY', liked: false },
+      { id: 3, title: 'Interstellar', year: 2014, rating: 8.7, votes: 19872, runtime: '2h 49m', tagline: 'Mankind was born on Earth.', overview: 'A team of explorers travel through a wormhole...', genres: ['Sci-Fi', 'Adventure', 'Drama'], country: 'USA', poster: '/gEU2QniE6E77NI6lCU6MxlNvHxR.jpg', backdrop: '/xJHokMbljvjADYdit5fK5VQsXEG.jpg', video_url: 'https://www.youtube.com/embed/zSWdZVtXT7E', liked: false },
+      { id: 4, title: 'The Matrix', year: 1999, rating: 8.7, votes: 21543, runtime: '2h 16m', tagline: 'Welcome to the real world.', overview: 'A computer programmer discovers reality is a simulation...', genres: ['Sci-Fi', 'Action'], country: 'USA', poster: '/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg', backdrop: '/fIu1B1N1bLWl0gJX0OF3yXz0w8I.jpg', video_url: 'https://www.youtube.com/embed/vKQi3bBA1y8', liked: false },
+      { id: 5, title: 'Parasite', year: 2019, rating: 8.6, votes: 16789, runtime: '2h 12m', tagline: 'Act like you own the place.', overview: 'A poor family schemes to become employed by a wealthy family...', genres: ['Thriller', 'Drama', 'Comedy'], country: 'South Korea', poster: '/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', backdrop: '/TU9NIjwzjoKPwQHoHshkFcETCG.jpg', video_url: null, liked: false },
+      { id: 6, title: 'Spirited Away', year: 2001, rating: 8.6, votes: 14234, runtime: '2h 5m', tagline: 'A journey beyond your imagination.', overview: 'A sullen girl wanders into a world ruled by gods and spirits...', genres: ['Animation', 'Adventure', 'Fantasy'], country: 'Japan', poster: '/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg', backdrop: '/9YjzWnSz9xqbiIwQ2rGfDq6MEm2.jpg', video_url: null, liked: false },
+      { id: 7, title: 'The Godfather', year: 1972, rating: 9.2, votes: 19834, runtime: '2h 55m', tagline: 'An offer you can\'t refuse.', overview: 'The aging patriarch of an organized crime dynasty...', genres: ['Crime', 'Drama'], country: 'USA', poster: '/3bhkrj58Vtu7enYsRolD1fZdja1.jpg', backdrop: '/tmU7GeKVybMWFButWEGl2M4GeiP.jpg', video_url: null, liked: false },
+      { id: 8, title: 'Pulp Fiction', year: 1994, rating: 8.9, votes: 22345, runtime: '2h 34m', tagline: 'You won\'t know the facts until you\'ve seen the fiction.', overview: 'The lives of two mob hitmen, a boxer, and a gangster\'s wife...', genres: ['Crime', 'Drama'], country: 'USA', poster: '/d5iIlFn5s0ImszYzBPb8vIfUBHJ.jpg', backdrop: '/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg', video_url: null, liked: false },
+      { id: 9, title: 'The Shawshank Redemption', year: 1994, rating: 9.3, votes: 26789, runtime: '2h 22m', tagline: 'Fear can hold you prisoner. Hope can set you free.', overview: 'Two imprisoned men bond over the years...', genres: ['Drama'], country: 'USA', poster: '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', backdrop: '/kXfqcdQKsToO0OUXHcrrNCHDBzO.jpg', video_url: null, liked: false },
     ];
 
     // ============================================================
@@ -836,10 +1045,13 @@
     let hasMore = true;
     let currentMovie = null;
 
+    // Auth state
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let isLoginMode = true;
+
     // Video state
     let currentVideoElement = null;
-    let currentVideoUrl = '';
-    let currentVideoId = null; // movie id for resume
+    let currentVideoId = null;
     let saveInterval = null;
 
     // ============================================================
@@ -857,6 +1069,24 @@
     const themeToggle = document.getElementById('themeToggle');
     const favoritesToggle = document.getElementById('favoritesToggle');
     const refreshBtn = document.getElementById('refreshBtn');
+
+    // Auth
+    const authOverlay = document.getElementById('authOverlay');
+    const authClose = document.getElementById('authClose');
+    const authTitle = document.getElementById('authTitle');
+    const authSubtitle = document.getElementById('authSubtitle');
+    const authForm = document.getElementById('authForm');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authUsername = document.getElementById('authUsername');
+    const usernameGroup = document.getElementById('usernameGroup');
+    const authSubmit = document.getElementById('authSubmit');
+    const authMessage = document.getElementById('authMessage');
+    const authSwitchLink = document.getElementById('authSwitchLink');
+    const authSwitchText = document.getElementById('authSwitchText');
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    const authSection = document.getElementById('authSection');
 
     // Modal
     const modalOverlay = document.getElementById('modalOverlay');
@@ -880,6 +1110,180 @@
     const subtitleBtn = document.getElementById('subtitleBtn');
     const subtitleFile = document.getElementById('subtitleFile');
     const subtitleStatus = document.getElementById('subtitleStatus');
+
+    // ============================================================
+    //  AUTH SYSTEM
+    // ============================================================
+    function updateAuthUI() {
+      if (currentUser) {
+        authSection.innerHTML = `
+          <div class="user-badge">
+            <i class="fas fa-user-circle"></i>
+            <span class="username">${currentUser.username || currentUser.email}</span>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+          </div>
+        `;
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+      } else {
+        authSection.innerHTML = `
+          <button class="auth-btn" id="loginBtn">Log In</button>
+          <button class="auth-btn outline" id="registerBtn">Sign Up</button>
+        `;
+        document.getElementById('loginBtn').addEventListener('click', () => openAuth(true));
+        document.getElementById('registerBtn').addEventListener('click', () => openAuth(false));
+      }
+    }
+
+    function openAuth(loginMode) {
+      isLoginMode = loginMode;
+      authOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      authMessage.className = 'form-message';
+      authMessage.textContent = '';
+      authMessage.style.display = 'none';
+
+      if (loginMode) {
+        authTitle.textContent = 'Log In';
+        authSubtitle.textContent = 'Welcome back! Log in to your account.';
+        authSubmit.textContent = 'Log In';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchLink.textContent = 'Sign Up';
+        usernameGroup.style.display = 'none';
+        authUsername.required = false;
+      } else {
+        authTitle.textContent = 'Create Account';
+        authSubtitle.textContent = 'Join CineVerse Pro today.';
+        authSubmit.textContent = 'Sign Up';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchLink.textContent = 'Log In';
+        usernameGroup.style.display = 'block';
+        authUsername.required = true;
+      }
+      authForm.reset();
+    }
+
+    function closeAuth() {
+      authOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    authClose.addEventListener('click', closeAuth);
+    authOverlay.addEventListener('click', (e) => {
+      if (e.target === authOverlay) closeAuth();
+    });
+
+    authSwitchLink.addEventListener('click', () => {
+      openAuth(!isLoginMode);
+    });
+
+    // Form submission
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+      const username = authUsername.value.trim();
+
+      // Validation
+      if (!email || !password) {
+        showAuthMessage('Please fill in all required fields.', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        showAuthMessage('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      // Prepare data for Formspree
+      const formData = {
+        email: email,
+        password: password, // Note: In production, NEVER send plain passwords! Use hashing.
+        action: isLoginMode ? 'login' : 'register',
+        timestamp: new Date().toISOString()
+      };
+
+      if (!isLoginMode) {
+        if (!username) {
+          showAuthMessage('Please choose a username.', 'error');
+          return;
+        }
+        formData.username = username;
+      }
+
+      // Simulate "login" by checking if user exists in localStorage
+      // In reality, Formspree will email you the data. For demo, we'll store locally.
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+
+      if (isLoginMode) {
+        // Login: check if user exists
+        const user = users.find(u => u.email === email && u.password === password);
+        if (user) {
+          currentUser = user;
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          updateAuthUI();
+          closeAuth();
+          showAuthMessage('Login successful!', 'success');
+          setTimeout(() => { authMessage.style.display = 'none'; }, 2000);
+          return;
+        } else {
+          showAuthMessage('Invalid email or password. Please try again.', 'error');
+          // Still send to Formspree so you get notified of failed attempts
+          sendToFormspree(formData);
+          return;
+        }
+      } else {
+        // Register: check if email already exists
+        if (users.some(u => u.email === email)) {
+          showAuthMessage('An account with this email already exists. Please log in.', 'error');
+          return;
+        }
+        // Create new user
+        const newUser = { username, email, password, created: new Date().toISOString() };
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        currentUser = newUser;
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        updateAuthUI();
+        closeAuth();
+        showAuthMessage('Account created successfully! You are now logged in.', 'success');
+        setTimeout(() => { authMessage.style.display = 'none'; }, 2000);
+        // Send registration to Formspree
+        sendToFormspree(formData);
+        return;
+      }
+    });
+
+    function showAuthMessage(msg, type) {
+      authMessage.textContent = msg;
+      authMessage.className = `form-message ${type}`;
+      authMessage.style.display = 'block';
+    }
+
+    async function sendToFormspree(data) {
+      try {
+        const response = await fetch(FORMPREE_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        if (response.ok) {
+          console.log('✅ Formspree: Data sent successfully');
+        } else {
+          console.warn('⚠️ Formspree: Response not OK', response.status);
+        }
+      } catch (err) {
+        console.warn('⚠️ Formspree: Could not send data', err);
+      }
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      updateAuthUI();
+      // Optionally reload movies or reset state
+    }
 
     // ============================================================
     //  HELPERS
@@ -1226,23 +1630,19 @@
 
     function openVideo(url, movieId) {
       videoPlayer.innerHTML = '';
-      currentVideoUrl = url;
       currentVideoId = movieId;
       videoOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
       subtitleStatus.textContent = 'No subtitles loaded';
       subtitleFile.value = '';
 
-      // Detect if it's a direct video file (MP4, WebM, OGG, MOV)
       if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
-        // Use <video> element with subtitles support
         const video = document.createElement('video');
         video.controls = true;
         video.autoplay = false;
         video.style.width = '100%';
         video.style.aspectRatio = '16/9';
 
-        // Resume playback if we have saved time
         const savedTime = localStorage.getItem(`progress_${movieId}`);
         if (savedTime) {
           video.addEventListener('loadedmetadata', () => {
@@ -1255,7 +1655,6 @@
         source.type = 'video/mp4';
         video.appendChild(source);
 
-        // Error handling
         video.addEventListener('error', (e) => {
           videoPlayer.innerHTML = `<div class="video-error"><i class="fas fa-exclamation-triangle"></i> Failed to load video. Please check the URL or try a different source.</div>`;
         });
@@ -1263,7 +1662,6 @@
         videoPlayer.appendChild(video);
         currentVideoElement = video;
 
-        // Save progress every 5 seconds
         if (saveInterval) clearInterval(saveInterval);
         saveInterval = setInterval(() => {
           if (video && video.currentTime > 0) {
@@ -1271,7 +1669,6 @@
           }
         }, 5000);
 
-        // Also save on pause and before unload
         video.addEventListener('pause', () => {
           if (video.currentTime > 0) {
             localStorage.setItem(`progress_${movieId}`, video.currentTime);
@@ -1283,14 +1680,11 @@
           }
         });
 
-        // Show subtitle upload button
         document.getElementById('videoControlsOverlay').style.display = 'flex';
         subtitleBtn.style.display = 'inline-flex';
       } else {
-        // For embeds (YouTube, Dailymotion, Vimeo, etc.)
         document.getElementById('videoControlsOverlay').style.display = 'none';
         let embedUrl = url;
-        // Auto-play for embeds
         if (url.includes('youtube.com/embed') || url.includes('youtu.be')) {
           if (url.includes('youtu.be')) {
             const id = url.split('youtu.be/')[1]?.split('?')[0];
@@ -1305,7 +1699,6 @@
         }
         videoPlayer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="width:100%;aspect-ratio:16/9;border:none;"></iframe>`;
         currentVideoElement = null;
-        // No progress saving for embeds
         if (saveInterval) clearInterval(saveInterval);
       }
     }
@@ -1323,13 +1716,10 @@
       const reader = new FileReader();
       reader.onload = (event) => {
         const content = event.target.result;
-        // Create a Blob URL for the subtitle file
         const blob = new Blob([content], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
-        // Attach to video element
         const video = currentVideoElement;
         if (video) {
-          // Remove old track if any
           const oldTrack = video.querySelector('track');
           if (oldTrack) oldTrack.remove();
           const track = document.createElement('track');
@@ -1338,8 +1728,9 @@
           track.srclang = 'en';
           track.src = url;
           video.appendChild(track);
-          // Enable subtitles
-          video.textTracks[0].mode = 'showing';
+          if (video.textTracks.length > 0) {
+            video.textTracks[0].mode = 'showing';
+          }
           subtitleStatus.textContent = `✅ Subtitles loaded: ${file.name}`;
         }
       };
@@ -1353,7 +1744,6 @@
       videoOverlay.classList.remove('open');
       document.body.style.overflow = '';
       if (saveInterval) clearInterval(saveInterval);
-      // Save final progress
       if (currentVideoElement && currentVideoId) {
         const time = currentVideoElement.currentTime;
         if (time > 0) localStorage.setItem(`progress_${currentVideoId}`, time);
@@ -1427,13 +1817,14 @@
     });
 
     // ============================================================
-    //  START
+    //  INIT
     // ============================================================
+    updateAuthUI();
     loadData();
-    console.log('🎬 CineVerse Pro – Subtitles & Continue Watching enabled!');
-    console.log('📺 Click "Watch Now" on any movie with a video link.');
-    console.log('💡 For direct MP4 videos, you can upload .srt/.vtt subtitles.');
-    console.log('⏳ Your progress is saved automatically.');
+
+    console.log('🎬 CineVerse Pro – Login & Registration with Formspree!');
+    console.log('📧 All submissions go to:', FORMPREE_ENDPOINT);
+    console.log('👤 Users are stored in localStorage for demo purposes.');
   </script>
 </body>
 </html>
